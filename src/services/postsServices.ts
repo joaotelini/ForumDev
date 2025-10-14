@@ -1,12 +1,6 @@
 import db from "../database/connection";
 import type { Post } from "../schemas/postsSchema";
-
-type ServiceResponse<T> = {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: any;
-};
+import type { ServiceResponse } from "../types/serviceResponse";
 
 export const deletePost = async (
   id: Post["id"]
