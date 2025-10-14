@@ -1,9 +1,11 @@
 import express from "express";
 import helmet from "helmet";
 import routes from "./routes";
+import cors from "cors";
 
 const server = express();
 
+server.use(cors());
 server.use(helmet());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
