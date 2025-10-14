@@ -1,4 +1,5 @@
 import db from "../database/connection";
+
 import type { User } from "../schemas/usersSchema";
 import type { ServiceResponse } from "../types/serviceResponse";
 
@@ -22,21 +23,10 @@ export const signinUser = async (
   }
 };
 
-export const getUserById = async (
-  id: User["id"]
-): Promise<ServiceResponse<User>> => {
-  try {
-    const rows = await db<
-      User[]
-    >`SELECT id, username FROM users WHERE id = ${id}`;
+export const getUserByEmail = async (
+  email: User["email"]
+): Promise<User | null> => {
+  const rows = await db<User[]>`SELECT * FROM users WHERE email = ${email}`;
 
-    if (rows.length === 0) {
-      return { success: false, message: "Usuário não encontrado" };
-    }
-
-    return { success: true, data: rows[0] };
-  } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
-    return { success: false, message: "Erro ao buscar usuário", error };
-  }
+  return rows[0] || null;
 };

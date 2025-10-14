@@ -1,38 +1,37 @@
 import express from "express";
 import { userSchema } from "../schemas/usersSchema";
+import { checkUserExists } from "../middlewares/checkUserExists";
 import { randomUUIDv7 } from "bun";
 import { signinUser } from "../services/usersService";
 
 const router = express.Router();
 
-router.post("/signin", async (req, res) => {
+router.post("/signin", checkUserExists, async (req, res) => {
   const { username, email, password } = req.body;
+
+  const id = randomUUIDv7();
+
+  const validation = userSchema.safeParse({ id, username, email, password });
+
+  if (!validation.success) {
+    console.log(validation.error.message);
+    return res.status(400).json({
+      error: "Erro ao criar usuário, tente novamente",
+    });
+  }
 
   const hashPass = await Bun.password.hash(password);
 
   const user = {
-    id: randomUUIDv7(),
+    id,
     username,
     email,
     password: hashPass,
   };
 
-  // validação com Zod
-  const validation = userSchema.safeParse(user);
-  if (!validation.success) {
-    return res.status(400).json({
-      error: "Validation failed",
-      details: validation,
-    });
-  }
+  await signinUser(user);
 
-  const { success, message, error } = await signinUser(user);
-
-  if (!success) {
-    return res.status(500).json({ error: message, details: error });
-  }
-
-  return res.status(201).json({ success: true, user: user.id });
+  return res.status(201).json({ success: true, id: user.id });
 });
 
 export default router;
