@@ -1,9 +1,26 @@
 import express from "express";
 import { postSchema, type Post } from "../schemas/postsSchema";
 import { randomUUIDv7 } from "bun";
-import { getPostById, getPosts, makePost } from "../services/postsServices";
+import {
+  deletePost,
+  getPostById,
+  getPosts,
+  makePost,
+} from "../services/postsServices";
 
 const router = express.Router();
+
+router.delete("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const { success, message, error } = await deletePost(id);
+
+  if (!success) {
+    return res.status(404).json({ error: message, details: error });
+  }
+
+  return res.status(200).json({ message: "Post deleted successfully" });
+});
 
 router.get("/posts", async (req, res) => {
   const { success, data, message, error } = await getPosts();
@@ -61,7 +78,7 @@ router.post("/posts", async (req, res) => {
     return res.status(500).json({ error: message, details: error });
   }
 
-  return res.status(201).json({ message });
+  return res.status(201).json({ success: true, post });
 });
 
 export default router;

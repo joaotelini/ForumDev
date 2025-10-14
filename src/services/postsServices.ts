@@ -8,6 +8,27 @@ type ServiceResponse<T> = {
   error?: any;
 };
 
+export const deletePost = async (
+  id: Post["id"]
+): Promise<ServiceResponse<null>> => {
+  try {
+    // DELETE do Bun nao retorna o numero de linhas afetadas
+    // Verifica se o post existe antes de deletar
+    const exists = await db`SELECT id FROM posts WHERE id = ${id}`;
+
+    if (exists.length === 0) {
+      return { success: false, message: "Post não encontrado" };
+    }
+
+    await db`DELETE FROM posts WHERE id = ${id}`;
+
+    return { success: true, message: "Post deletado com sucesso" };
+  } catch (error) {
+    console.error("Erro ao deletar post:", error);
+    return { success: false, message: "Erro ao deletar post", error };
+  }
+};
+
 export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
   try {
     const rows = await db<Post[]>`SELECT * FROM posts`;
@@ -51,7 +72,6 @@ export const makePost = async (post: Post): Promise<ServiceResponse<Post>> => {
     return {
       success: true,
       data: post,
-      message: "Post criado com sucesso",
     };
   } catch (error) {
     console.error("Erro ao criar post:", error);
