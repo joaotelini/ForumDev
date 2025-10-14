@@ -1,18 +1,41 @@
 import express from "express";
-import { postSchema } from "../schemas/postsSchema";
-import type { Post } from "../schemas/postsSchema";
+import { postSchema, type Post } from "../schemas/postsSchema";
 import { randomUUIDv7 } from "bun";
-import db from "../database/connection";
+import { getPostById, getPosts, makePost } from "../services/postsServices";
 
 const router = express.Router();
 
-router.get("/posts", (req, res) => {
-  res.json({
-    serverStatus: "Online",
+router.get("/posts", async (req, res) => {
+  const { success, data, message, error } = await getPosts();
+
+  if (!success) {
+    return res.status(404).json({ error: message, details: error });
+  }
+
+  return res.status(200).json({
+    message: "Posts found successfully",
+    posts: data,
   });
 });
 
-router.get("/posts/:id", (req, res) => {});
+router.get("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Missing post ID" });
+  }
+
+  const { success, data, message, error } = await getPostById(id);
+
+  if (!success) {
+    return res.status(404).json({ error: message, details: error });
+  }
+
+  return res.status(200).json({
+    message: "Post found successfully",
+    post: data,
+  });
+});
 
 router.post("/posts", async (req, res) => {
   const { title, content } = req.body;
@@ -23,21 +46,22 @@ router.post("/posts", async (req, res) => {
     content,
   };
 
-  const result = postSchema.safeParse(post);
-
-  if (!result.success) {
-    return res.status(400).json({ error: "Bad request" });
+  // validação com Zod
+  const validation = postSchema.safeParse(post);
+  if (!validation.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      details: validation.error.flatten(),
+    });
   }
 
-  try {
-    const query = await db`INSERT INTO posts ${db(post)}`;
-    if (query.affectedRows === 0) {
-      return res.status(500).json({ error: "Error creating post" });
-    }
-    return res.status(201).json({ message: "Post created successfully" });
-  } catch (error) {
-    return res.status(500).json({ error: error });
+  const { success, message, error } = await makePost(post);
+
+  if (!success) {
+    return res.status(500).json({ error: message, details: error });
   }
+
+  return res.status(201).json({ message });
 });
 
 export default router;
