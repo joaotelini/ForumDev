@@ -31,18 +31,6 @@ router.get("/posts/user/:id", async (req, res) => {
   });
 });
 
-router.delete("/posts/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const { success, message, error } = await deletePost(id);
-
-  if (!success) {
-    return res.status(404).json({ error: message, details: error });
-  }
-
-  return res.status(200).json({ message: "Post deleted successfully" });
-});
-
 router.get("/posts", async (req, res) => {
   const { success, data, message, error } = await getPosts();
 
@@ -91,7 +79,6 @@ router.post("/posts", jwtMiddleware, async (req, res) => {
   if (!title || !content) {
     return res.status(400).json({ error: "Missing title or content" });
   }
-  
 
   const validation = postSchema.safeParse(post);
   if (!validation.success) {
@@ -108,6 +95,18 @@ router.post("/posts", jwtMiddleware, async (req, res) => {
   }
 
   return res.status(201).json({ success: true, post });
+});
+
+router.delete("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const { success, message, error } = await deletePost(id);
+
+  if (!success) {
+    return res.status(404).json({ error: message, details: error });
+  }
+
+  return res.status(200).json({ message: "Post deleted successfully" });
 });
 
 export default router;

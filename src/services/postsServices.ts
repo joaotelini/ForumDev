@@ -38,6 +38,30 @@ export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
   }
 };
 
+export const getPostByUserId = async (
+  user_id: Post["user_id"]
+): Promise<ServiceResponse<Post[]>> => {
+  try {
+    const rows = await db<Post[]>`
+      SELECT title, content FROM posts WHERE user_id = ${user_id}
+    `;
+
+    if (rows.length === 0) {
+      return {
+        success: false,
+        message: "Nenhum post encontrado por esse usuário",
+      };
+    }
+
+    const data = rows.filter((row: any) => row.title && row.content);
+
+    return { success: true, data: data };
+  } catch (error) {
+    console.error("Erro ao buscar posts:", error);
+    return { success: false, message: "Erro ao buscar posts", error };
+  }
+};
+
 export const getPostById = async (
   id: Post["id"]
 ): Promise<ServiceResponse<Post>> => {
