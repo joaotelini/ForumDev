@@ -3,4 +3,5 @@ export type ServiceResponse<T> = {
   data?: T;
   message?: string;
   error?: any;
+  token?: string;
 };

@@ -2,6 +2,7 @@ import db from "../database/connection";
 import type { Login, User } from "../schemas/usersSchema";
 import type { ServiceResponse } from "../types/serviceResponse";
 import { validatePassword } from "../middlewares/validatePassword";
+import generateTokenJwt from "../utils/generateTokenJwt";
 
 export const signinUser = async (
   user: User
@@ -56,7 +57,9 @@ export const loginUser = async (
 
     const { password: hash, ...userData } = userFound;
 
-    return { success: true, data: userData };
+    const token = generateTokenJwt(userData.id);
+
+    return { success: true, data: userData, token: token };
   } catch (error) {
     console.error("Erro ao logar usuário:", error);
     return { success: false, message: "Erro ao logar usuário", error };
