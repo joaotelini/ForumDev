@@ -1,7 +1,7 @@
 import db from "../database/connection";
-
-import type { User } from "../schemas/usersSchema";
+import type { Login, User } from "../schemas/usersSchema";
 import type { ServiceResponse } from "../types/serviceResponse";
+import { validatePassword } from "../middlewares/validatePassword";
 
 export const signinUser = async (
   user: User
@@ -26,7 +26,39 @@ export const signinUser = async (
 export const getUserByEmail = async (
   email: User["email"]
 ): Promise<User | null> => {
-  const rows = await db<User[]>`SELECT * FROM users WHERE email = ${email}`;
+  try {
+    const rows = await db<User[]>`SELECT * FROM users WHERE email = ${email}`;
 
-  return rows[0] || null;
+    return rows[0] || null;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const loginUser = async (
+  user: Login
+): Promise<ServiceResponse<Omit<User, "password">>> => {
+  try {
+    const userFound = await getUserByEmail(user.email);
+
+    if (!userFound) {
+      return { success: false, message: "Usuário ou senha incorretos" };
+    }
+
+    const isPassValid = await validatePassword(
+      user.password,
+      userFound.password
+    );
+
+    if (!isPassValid) {
+      return { success: false, message: "Usuario ou senha incorretos" };
+    }
+
+    const { password: hash, ...userData } = userFound;
+
+    return { success: true, data: userData };
+  } catch (error) {
+    console.error("Erro ao logar usuário:", error);
+    return { success: false, message: "Erro ao logar usuário", error };
+  }
 };
