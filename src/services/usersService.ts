@@ -36,7 +36,7 @@ export const getUserByEmail = async (
   }
 };
 
-export const loginUser = async (
+export const loginService = async (
   user: Login
 ): Promise<ServiceResponse<Omit<User, "password">>> => {
   try {

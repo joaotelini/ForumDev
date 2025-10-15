@@ -4,18 +4,8 @@ import type { NextFunction, Request, Response } from "express";
 
 const JWT_SECRET = process.env.SECRET_KEY_JWT;
 
-const jwtMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing Bearer token" });
-  }
-
-  const token = authHeader.split(" ")[1];
+const jwtMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies?.token; // usa optional chaining
 
   if (!token) {
     return res.status(401).json({ error: "Missing token" });
@@ -27,11 +17,10 @@ const jwtMiddleware = async (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
     (req as any).user = decoded;
-
     next();
   } catch (error) {
+    console.error("Erro ao verificar JWT:", error);
     return res.status(401).json({ error: "Invalid token" });
   }
 };
