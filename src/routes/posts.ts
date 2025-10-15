@@ -5,10 +5,31 @@ import {
   deletePost,
   getPostById,
   getPosts,
+  getPostByUserId,
   makePost,
 } from "../services/postsServices";
+import jwtMiddleware from "../middlewares/jwtValidation";
 
 const router = express.Router();
+
+router.get("/posts/user/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Missing user ID" });
+  }
+
+  const { success, data, message, error } = await getPostByUserId(id);
+
+  if (!success) {
+    return res.status(404).json({ error: message, details: error });
+  }
+
+  return res.status(200).json({
+    message: "Posts found successfully",
+    posts: data,
+  });
+});
 
 router.delete("/posts/:id", async (req, res) => {
   const { id } = req.params;
@@ -54,16 +75,24 @@ router.get("/posts/:id", async (req, res) => {
   });
 });
 
-router.post("/posts", async (req, res) => {
+router.post("/posts", jwtMiddleware, async (req, res) => {
   const { title, content } = req.body;
+  // get user id from token
+  const user_id = (req as any).user.id;
 
   const post: Post = {
     id: randomUUIDv7(),
     title,
     content,
+    user_id: user_id,
+    created_at: new Date(),
   };
 
-  // validação com Zod
+  if (!title || !content) {
+    return res.status(400).json({ error: "Missing title or content" });
+  }
+  
+
   const validation = postSchema.safeParse(post);
   if (!validation.success) {
     return res.status(400).json({

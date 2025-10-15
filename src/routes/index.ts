@@ -6,9 +6,9 @@ import jwtMiddleware from "../middlewares/jwtValidation";
 
 const router = express.Router();
 
-router.use("/", jwtMiddleware, postsRoute);
 router.use("/", signinRoute);
 router.use("/", loginRoute);
+router.use("/", jwtMiddleware, postsRoute);
 
 router.get("/", (req, res) => {
   res.json({
