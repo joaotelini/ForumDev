@@ -9,6 +9,10 @@ const router = express.Router();
 router.post("/signin", checkUserExists, async (req, res) => {
   const { username, email, password } = req.body;
 
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: "Campos obrigatórios ausentes" });
+  }
+
   const id = randomUUIDv7();
 
   const validation = userSchema.safeParse({ id, username, email, password });
