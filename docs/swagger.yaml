@@ -1,0 +1,366 @@
+openapi: 3.0.3
+info:
+  title: API ForumDev
+  description: API para gerenciar usuários, posts e comentários com autenticação via JWT em cookies
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+
+  schemas:
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: mypassword123
+
+    UserSignIn:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        password:
+          type: string
+          example: mypassword123
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 0199f268-0450-7000-9dd2-74789ee4d897
+        title:
+          type: string
+          example: Como manter o foco nos estudos
+        content:
+          type: string
+          example: Manter a concentração é um desafio na era digital...
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-10-17T16:42:07.000Z
+        user_id:
+          type: string
+          example: 0199e966-17f3-7000-b359-68f284a8c985
+        username:
+          type: string
+          example: johndoe
+        comment_count:
+          type: integer
+          example: 5
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: c123f268-0450-7000-9dd2-74789ee4d897
+        content:
+          type: string
+          example: Ótimo post, muito útil!
+        post_id:
+          type: string
+          example: 0199f268-0450-7000-9dd2-74789ee4d897
+        user_id:
+          type: string
+          example: 0199e966-17f3-7000-b359-68f284a8c985
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-10-17T17:00:00.000Z
+        username:
+          type: string
+          example: johndoe
+
+paths:
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Login do usuário
+      description: Autentica usuário e retorna token via cookie httpOnly
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        200:
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucess:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Usuário logado com sucesso
+        401:
+          description: Credenciais inválidas
+
+  /signin:
+    post:
+      tags:
+        - Auth
+      summary: Cadastro de usuário
+      description: Cria um novo usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignIn"
+      responses:
+        201:
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  id:
+                    type: string
+                    example: 0199e966-17f3-7000-b359-68f284a8c985
+        400:
+          description: Erro na validação
+
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Lista todos os posts
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: Lista de posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  posts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Post"
+
+    post:
+      tags:
+        - Posts
+      summary: Cria um novo post
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  example: Meu novo post
+                content:
+                  type: string
+                  example: Conteúdo do post
+      responses:
+        201:
+          description: Post criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  post:
+                    $ref: "#/components/schemas/Post"
+
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Busca um post pelo ID
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Post encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  post:
+                    $ref: "#/components/schemas/Post"
+
+    delete:
+      tags:
+        - Posts
+      summary: Deleta um post pelo ID
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Post deletado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Post deleted
+
+  /posts/user/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Lista posts de um usuário específico
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Lista de posts do usuário
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  posts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Post"
+
+  /post/{post_id}/comment:
+    get:
+      tags:
+        - Comments
+      summary: Lista comentários de um post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Lista de comentários
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  comments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+
+    post:
+      tags:
+        - Comments
+      summary: Cria um comentário em um post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  example: Ótimo post!
+      responses:
+        201:
+          description: Comentário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucess:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Comment"
