@@ -32,7 +32,7 @@ export const getCommentsByPostId = async (
     `;
 
     if (rows.length === 0) {
-      return { success: false, message: "Nenhum comentário encontrado" };
+      return { success: true, message: "Nenhum comentário encontrado" };
     }
 
     return { success: true, data: rows };

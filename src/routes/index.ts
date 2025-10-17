@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.use("/", signinRoute);
 router.use("/", loginRoute);
-router.use("/", commentRoutes);
+router.use("/", jwtMiddleware, commentRoutes);
 router.use("/", jwtMiddleware, postsRoute);
 
 router.get("/", (req, res) => {

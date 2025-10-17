@@ -4,12 +4,11 @@ import {
   createComment,
   getCommentsByPostId,
 } from "../services/commentsService";
-import jwtMiddleware from "../middlewares/jwtValidation";
 import { randomUUIDv7 } from "bun";
 
 const router = express.Router();
 
-router.post("/comment/:post_id", jwtMiddleware, async (req, res) => {
+router.post("/comment/:post_id", async (req, res) => {
   const { post_id } = req.params;
   const { content } = req.body;
   const user_id = (req as any).user.id;
@@ -46,7 +45,7 @@ router.post("/comment/:post_id", jwtMiddleware, async (req, res) => {
   return res.status(201).json({ sucess: true, data: result.data });
 });
 
-router.get("/comment/:post_id", jwtMiddleware, async (req, res) => {
+router.get("/post/:post_id/comment", async (req, res) => {
   const { post_id } = req.params;
 
   if (!post_id) {

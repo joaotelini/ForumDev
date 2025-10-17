@@ -5,7 +5,7 @@ import {
   deletePost,
   getPostById,
   getPosts,
-  getPostByUserId,
+  getPostsByUserId,
   createPost,
 } from "../services/postsServices";
 
@@ -18,14 +18,14 @@ router.get("/posts/user/:id", async (req, res) => {
     return res.status(400).json({ error: "Missing user ID" });
   }
 
-  const { success, data, message, error } = await getPostByUserId(id);
+  const { success, data, message, error } = await getPostsByUserId(id);
 
   if (!success) {
     return res.status(404).json({ error: message, details: error });
   }
 
   return res.status(200).json({
-    message: "Posts found successfully",
+    success: true,
     posts: data,
   });
 });
@@ -38,7 +38,7 @@ router.get("/posts", async (req, res) => {
   }
 
   return res.status(200).json({
-    message: "Posts found successfully",
+    success: true,
     posts: data,
   });
 });
@@ -57,7 +57,7 @@ router.get("/posts/:id", async (req, res) => {
   }
 
   return res.status(200).json({
-    message: "Post found successfully",
+    success: true,
     post: data,
   });
 });
@@ -104,7 +104,7 @@ router.delete("/posts/:id", async (req, res) => {
     return res.status(404).json({ error: message, details: error });
   }
 
-  return res.status(200).json({ message: "Post deleted successfully" });
+  return res.status(200).json({ success: true, message: "Post deleted" });
 });
 
 export default router;

@@ -25,7 +25,20 @@ export const deletePost = async (
 
 export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
   try {
-    const rows = await db<Post[]>`SELECT * FROM posts ORDER BY created_at ASC`;
+    const rows = await db<Post[]>`
+    SELECT 
+      p.id AS post_id,
+      p.title AS post_title,
+      p.content AS post_content,
+      p.created_at AS post_created_at,
+      u.id AS user_id,
+      u.username AS user_username,
+      COUNT(c.id) AS comment_count
+    FROM posts p
+    INNER JOIN users u ON p.user_id = u.id
+    LEFT JOIN comments c ON c.post_id = p.id
+    GROUP BY p.id, u.id
+    ORDER BY p.created_at DESC;`;
 
     if (rows.length === 0) {
       return { success: false, message: "Nenhum post encontrado" };
@@ -38,24 +51,37 @@ export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
   }
 };
 
-export const getPostByUserId = async (
+export const getPostsByUserId = async (
   user_id: Post["user_id"]
 ): Promise<ServiceResponse<Post[]>> => {
   try {
     const rows = await db<Post[]>`
-      SELECT title, content FROM posts WHERE user_id = ${user_id}
+SELECT 
+  p.id AS post_id,
+  p.title AS post_title,
+  p.content AS post_content,
+  p.created_at AS post_created_at,
+  u.id AS user_id,
+  u.username AS user_username,
+  COUNT(c.id) AS comment_count
+FROM posts p
+INNER JOIN users u ON p.user_id = u.id
+LEFT JOIN comments c ON c.post_id = p.id
+WHERE u.id = ${user_id}
+GROUP BY p.id, p.title, p.content, p.created_at, u.id, u.username
+ORDER BY p.created_at DESC;
+
+
     `;
 
     if (rows.length === 0) {
       return {
-        success: false,
+        success: true,
         message: "Nenhum post encontrado por esse usuário",
       };
     }
 
-    const data = rows.filter((row: any) => row.title && row.content);
-
-    return { success: true, data: data };
+    return { success: true, data: rows };
   } catch (error) {
     console.error("Erro ao buscar posts:", error);
     return { success: false, message: "Erro ao buscar posts", error };
@@ -66,7 +92,20 @@ export const getPostById = async (
   id: Post["id"]
 ): Promise<ServiceResponse<Post>> => {
   try {
-    const rows = await db<Post[]>`SELECT * FROM posts WHERE id = ${id}`;
+    const rows = await db<Post[]>`
+    SELECT 
+      p.id AS post_id, 
+      p.title AS post_title, 
+      p.content AS post_content,
+      p.created_at AS post_created_at, 
+      u.id AS user_id, 
+      u.username AS user_username
+    FROM posts p 
+    INNER JOIN users u
+    ON u.id = p.user_id 
+    WHERE p.id = ${id} 
+    GROUP BY p.id, u.id
+    ORDER BY p.created_at DESC;`;
 
     if (rows.length === 0) {
       return { success: false, message: "Post não encontrado" };
