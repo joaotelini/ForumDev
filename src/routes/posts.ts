@@ -8,7 +8,6 @@ import {
   getPostByUserId,
   makePost,
 } from "../services/postsServices";
-import jwtMiddleware from "../middlewares/jwtValidation";
 
 const router = express.Router();
 
@@ -63,10 +62,13 @@ router.get("/posts/:id", async (req, res) => {
   });
 });
 
-router.post("/posts", jwtMiddleware, async (req, res) => {
+router.post("/posts", async (req, res) => {
   const { title, content } = req.body;
   // get user id from token
   const user_id = (req as any).user.id;
+  if (!title || !content) {
+    return res.status(400).json({ error: "Missing title or content" });
+  }
 
   const post: Post = {
     id: randomUUIDv7(),
@@ -75,10 +77,6 @@ router.post("/posts", jwtMiddleware, async (req, res) => {
     user_id: user_id,
     created_at: new Date(),
   };
-
-  if (!title || !content) {
-    return res.status(400).json({ error: "Missing title or content" });
-  }
 
   const validation = postSchema.safeParse(post);
   if (!validation.success) {
