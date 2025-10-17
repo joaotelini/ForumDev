@@ -1,7 +1,7 @@
 import db from "../database/connection";
 import type { Login, User } from "../schemas/usersSchema";
 import type { ServiceResponse } from "../types/serviceResponse";
-import { validatePassword } from "../middlewares/validatePassword";
+import { validatePassword } from "../utils/validatePassword";
 import generateTokenJwt from "../utils/generateTokenJwt";
 
 export const signinUser = async (

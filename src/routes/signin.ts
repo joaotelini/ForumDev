@@ -1,6 +1,6 @@
 import express from "express";
 import { userSchema } from "../schemas/usersSchema";
-import { checkUserExists } from "../middlewares/checkUserExists";
+import { checkUserExists } from "../utils/checkUserExists";
 import { randomUUIDv7 } from "bun";
 import { signinUser } from "../services/usersService";
 
