@@ -20,8 +20,7 @@ const jwtMiddleware = (req: Request, res: Response, next: NextFunction) => {
     (req as any).user = decoded;
     next();
   } catch (error) {
-    console.error("Erro ao verificar JWT:", error);
-    return res.status(401).json({ error: "Invalid token" });
+    return res.status(401).json({ error: "Token expired" });
   }
 };
 
