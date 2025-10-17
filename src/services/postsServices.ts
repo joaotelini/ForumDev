@@ -25,7 +25,7 @@ export const deletePost = async (
 
 export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
   try {
-    const rows = await db<Post[]>`SELECT * FROM posts`;
+    const rows = await db<Post[]>`SELECT * FROM posts ORDER BY created_at ASC`;
 
     if (rows.length === 0) {
       return { success: false, message: "Nenhum post encontrado" };
@@ -79,7 +79,9 @@ export const getPostById = async (
   }
 };
 
-export const makePost = async (post: Post): Promise<ServiceResponse<Post>> => {
+export const createPost = async (
+  post: Post
+): Promise<ServiceResponse<Post>> => {
   try {
     const result = await db`INSERT INTO posts ${db(post)}`;
 

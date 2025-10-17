@@ -6,7 +6,7 @@ import {
   getPostById,
   getPosts,
   getPostByUserId,
-  makePost,
+  createPost,
 } from "../services/postsServices";
 
 const router = express.Router();
@@ -86,7 +86,7 @@ router.post("/posts", async (req, res) => {
     });
   }
 
-  const { success, message, error } = await makePost(post);
+  const { success, message, error } = await createPost(post);
 
   if (!success) {
     return res.status(500).json({ error: message, details: error });
