@@ -1,6 +1,6 @@
 import express, { type Request, type Response } from "express";
 import { loginSchema } from "../schemas/usersSchema";
-import { loginService } from "../services/usersService";
+import { loginUser } from "../services/usersService";
 const router = express.Router();
 
 router.post("/login", async (req: Request, res: Response) => {
@@ -19,7 +19,7 @@ router.post("/login", async (req: Request, res: Response) => {
     });
   }
 
-  const result = await loginService(user);
+  const result = await loginUser(user);
 
   if (!result.success) {
     return res.status(401).json({ error: result.message });
@@ -28,7 +28,8 @@ router.post("/login", async (req: Request, res: Response) => {
   res.cookie("token", result.token, {
     httpOnly: true,
     secure: false,
-    sameSite: "strict",
+    sameSite: "lax",
+    path: "/",
     maxAge: 1000 * 60 * 60 * 24,
   });
 

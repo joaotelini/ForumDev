@@ -4,7 +4,7 @@ import type { ServiceResponse } from "../types/serviceResponse";
 import { validatePassword } from "../utils/validatePassword";
 import generateTokenJwt from "../utils/generateTokenJwt";
 
-export const signinUser = async (
+export const signupUser = async (
   user: User
 ): Promise<ServiceResponse<User>> => {
   try {
@@ -36,7 +36,7 @@ export const getUserByEmail = async (
   }
 };
 
-export const loginService = async (
+export const loginUser = async (
   user: Login
 ): Promise<ServiceResponse<Omit<User, "password">>> => {
   try {

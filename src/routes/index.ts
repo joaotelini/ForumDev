@@ -1,13 +1,13 @@
 import express from "express";
 import postsRoute from "./posts";
-import signinRoute from "./signin";
+import signupUser from "./signup";
 import loginRoute from "./login";
 import commentRoutes from "./comment";
 import jwtMiddleware from "../middlewares/jwtValidation";
 
 const router = express.Router();
 
-router.use("/", signinRoute);
+router.use("/", signupUser);
 router.use("/", loginRoute);
 router.use("/", jwtMiddleware, commentRoutes);
 router.use("/", jwtMiddleware, postsRoute);

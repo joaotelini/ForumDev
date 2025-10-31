@@ -2,11 +2,11 @@ import express from "express";
 import { userSchema } from "../schemas/usersSchema";
 import { checkUserExists } from "../utils/checkUserExists";
 import { randomUUIDv7 } from "bun";
-import { signinUser } from "../services/usersService";
+import { signupUser } from "../services/usersService";
 
 const router = express.Router();
 
-router.post("/signin", checkUserExists, async (req, res) => {
+router.post("/signup", checkUserExists, async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -33,7 +33,7 @@ router.post("/signin", checkUserExists, async (req, res) => {
     password: hashPass,
   };
 
-  await signinUser(user);
+  await signupUser(user);
 
   return res.status(201).json({ success: true, id: user.id });
 });
