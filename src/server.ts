@@ -6,11 +6,10 @@ import cookieParser from "cookie-parser";
 import fs from "fs";
 import yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
-import path from "path";
 
 const server = express();
 
-const file = fs.readFileSync(__dirname + "/docs/swagger.yaml", "utf8");
+const file = fs.readFileSync("./docs/swagger.yaml", "utf8");
 const swaggerDocument = yaml.parse(file);
 
 server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
