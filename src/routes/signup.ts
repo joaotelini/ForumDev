@@ -33,7 +33,19 @@ router.post("/signup", checkUserExists, async (req, res) => {
     password: hashPass,
   };
 
-  await signupUser(user);
+  const result = await signupUser(user);
+
+  if (!result.success) {
+    return res.status(500).json({ error: "Erro ao criar usuário" });
+  }
+
+  res.cookie("token", result.token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 1000 * 60 * 60 * 24,
+  });
 
   return res.status(201).json({ success: true, id: user.id });
 });

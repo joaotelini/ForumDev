@@ -14,9 +14,12 @@ export const signupUser = async (
       return { success: false, message: "Erro ao criar usuário" };
     }
 
+    const token = generateTokenJwt(user.id);
+
     return {
       success: true,
       data: user,
+      token: token,
     };
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
