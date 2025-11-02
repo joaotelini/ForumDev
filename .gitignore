@@ -1,6 +1,8 @@
 # dependencies (bun install)
 node_modules
 
+TODO.txt
+
 # output
 out
 dist
