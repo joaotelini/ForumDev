@@ -25,6 +25,14 @@ router.post("/login", async (req: Request, res: Response) => {
     return res.status(401).json({ error: result.message });
   }
 
+  // PROD
+  // secure: process.env.NODE_ENV === "production",
+  // sameSite: "strict",
+
+  // DEV
+  // secure: false,
+  // sameSite: "lax",
+
   res.cookie("token", result.token, {
     httpOnly: true,
     secure: false,
@@ -35,7 +43,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .json({ sucess: result.success, message: "Usuário logado com sucesso" });
+    .json({ success: result.success, message: "Usuário logado com sucesso", data: result.data });
 });
 
 export default router;

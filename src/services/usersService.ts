@@ -3,11 +3,18 @@ import type { Login, User } from "../schemas/usersSchema";
 import type { ServiceResponse } from "../types/serviceResponse";
 import { validatePassword } from "../utils/validatePassword";
 import generateTokenJwt from "../utils/generateTokenJwt";
+import { checkUserExists } from "../utils/checkUserExists";
 
 export const signupUser = async (
   user: User
 ): Promise<ServiceResponse<User>> => {
   try {
+    const userExists = await checkUserExists(user.email, user.username);
+
+    if (userExists) {
+      return { success: false, message: "Usuário ja cadastrado" };
+    }
+
     const result = await db`INSERT INTO users ${db(user)}`;
 
     if (result.affectedRows === 0) {
@@ -27,35 +34,17 @@ export const signupUser = async (
   }
 };
 
-export const getUserByEmail = async (
-  email: User["email"]
-): Promise<User | null> => {
-  try {
-    const rows = await db<User[]>`SELECT * FROM users WHERE email = ${email}`;
-
-    return rows[0] || null;
-  } catch (error) {
-    return null;
-  }
-};
-
 export const loginUser = async (
   user: Login
 ): Promise<ServiceResponse<Omit<User, "password">>> => {
   try {
-    const userFound = await getUserByEmail(user.email);
+    const userFound = await checkUserExists(user.email);
 
-    if (!userFound) {
+    if (
+      !userFound ||
+      !(await validatePassword(user.password, userFound.password))
+    ) {
       return { success: false, message: "Usuário ou senha incorretos" };
-    }
-
-    const isPassValid = await validatePassword(
-      user.password,
-      userFound.password
-    );
-
-    if (!isPassValid) {
-      return { success: false, message: "Usuario ou senha incorretos" };
     }
 
     const { password: hash, ...userData } = userFound;

@@ -12,7 +12,8 @@ const jwtMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined");
+    console.error("JWT_SECRET não configurado");
+    return res.status(500).json({ error: "Erro interno de autenticação" });
   }
 
   try {

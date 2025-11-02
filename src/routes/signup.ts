@@ -1,12 +1,11 @@
-import express from "express";
+import express, { type Request, type Response } from "express";
 import { userSchema } from "../schemas/usersSchema";
-import { checkUserExists } from "../utils/checkUserExists";
 import { randomUUIDv7 } from "bun";
 import { signupUser } from "../services/usersService";
 
 const router = express.Router();
 
-router.post("/signup", checkUserExists, async (req, res) => {
+router.post("/signup", async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -18,10 +17,8 @@ router.post("/signup", checkUserExists, async (req, res) => {
   const validation = userSchema.safeParse({ id, username, email, password });
 
   if (!validation.success) {
-    console.log(validation.error.message);
-    return res.status(400).json({
-      error: "Erro ao criar usuário, tente novamente",
-    });
+    console.error("Erro de validação:", validation.error.message);
+    return res.status(400).json({ error: "Dados inválidos" });
   }
 
   const hashPass = await Bun.password.hash(password);
@@ -36,7 +33,7 @@ router.post("/signup", checkUserExists, async (req, res) => {
   const result = await signupUser(user);
 
   if (!result.success) {
-    return res.status(500).json({ error: "Erro ao criar usuário" });
+    return res.status(409).json({ error: result.message });
   }
 
   res.cookie("token", result.token, {
