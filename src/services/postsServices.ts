@@ -41,7 +41,7 @@ export const getPosts = async (): Promise<ServiceResponse<Post[]>> => {
     ORDER BY p.created_at DESC;`;
 
     if (rows.length === 0) {
-      return { success: false, message: "Nenhum post encontrado" };
+      return { success: true, message: "Nenhum post encontrado" };
     }
 
     return { success: true, data: rows };
