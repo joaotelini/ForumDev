@@ -21,7 +21,9 @@ router.post("/signup", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Dados inválidos" });
   }
 
-  const hashPass = await Bun.password.hash(password);
+  const hashPass = await Bun.password.hash(password, {
+    algorithm: "argon2id",
+  });
 
   const user = {
     id,

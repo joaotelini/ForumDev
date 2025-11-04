@@ -8,7 +8,7 @@ export const checkUserExists = async (
   try {
     const rows = await db<
       User[]
-    >`SELECT username, email FROM users WHERE email = ${email} OR username = ${username}`;
+    >`SELECT username, email, password FROM users WHERE email = ${email} OR username = ${username}`;
     return rows[0] || null;
   } catch (error) {
     return null;

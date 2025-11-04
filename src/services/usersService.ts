@@ -38,16 +38,22 @@ export const loginUser = async (
   user: Login
 ): Promise<ServiceResponse<Omit<User, "password">>> => {
   try {
-    const userFound = await checkUserExists(user.email);
+    const userExists = await checkUserExists(user.email);
 
-    if (
-      !userFound ||
-      !(await validatePassword(user.password, userFound.password))
-    ) {
+    if (userExists === null) {
       return { success: false, message: "Usuário ou senha incorretos" };
     }
 
-    const { password: hash, ...userData } = userFound;
+    const isPasswordValid = await validatePassword(
+      user.password,
+      userExists.password
+    );
+
+    if (!userExists || !isPasswordValid) {
+      return { success: false, message: "Usuário ou senha incorretos" };
+    }
+
+    const { password: hash, ...userData } = userExists;
 
     const token = generateTokenJwt(userData.id);
 
